@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | GTAGWebport</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #231F20;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #unity-canvas {
+        width: 960px;
+        height: 600px;
+        background: #231F20;
+      }
+
+      /* When fullscreen, fill the entire screen */
+      :fullscreen #unity-canvas,
+      :-webkit-full-screen #unity-canvas,
+      :-moz-full-screen #unity-canvas {
+        width: 100vw !important;
+        height: 100vh !important;
+      }
+
+      #fullscreen-btn {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        z-index: 9999;
+        transition: background 0.2s;
+      }
+
+      #fullscreen-btn:hover {
+        background: rgba(255,255,255,0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="unity-canvas" width=960 height=600></canvas>
+    <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+
+    <script src="Build/GTAG Webport.loader.js"></script>
+    <script>
+      // Handle mobile
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        var canvas = document.querySelector("#unity-canvas");
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.position = "fixed";
+      }
+
+      // Fullscreen toggle function
+      function toggleFullscreen() {
+        const elem = document.documentElement;
+        if (!document.fullscreenElement &&
+            !document.webkitFullscreenElement &&
+            !document.mozFullScreenElement) {
+          // Enter fullscreen
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+          } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+          }
+        } else {
+          // Exit fullscreen
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          }
+        }
+      }
+
+      // F11 key listener
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'F11') {
+          e.preventDefault(); // prevent browser's default F11 behavior
+          toggleFullscreen();
+        }
+      });
+
+      // Update canvas size on fullscreen change
+      document.addEventListener('fullscreenchange', resizeCanvas);
+      document.addEventListener('webkitfullscreenchange', resizeCanvas);
+      document.addEventListener('mozfullscreenchange', resizeCanvas);
+
+      function resizeCanvas() {
+        const canvas = document.querySelector("#unity-canvas");
+        if (document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement) {
+          canvas.style.width = "100vw";
+          canvas.style.height = "100vh";
+          document.getElementById('fullscreen-btn').textContent = '✕ Exit Fullscreen';
+        } else {
+          canvas.style.width = "960px";
+          canvas.style.height = "600px";
+          document.getElementById('fullscreen-btn').textContent = '⛶ Fullscreen';
+        }
+      }
+
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        dataUrl: "Build/GTAG Webport.data",
+        frameworkUrl: "Build/GTAG Webport.framework.js",
+        codeUrl: "Build/GTAG Webport.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "CrunchArcade",
+        productName: "GTAGWebport",
+        productVersion: "1",
+      });
+    </script>
+  </body>
+</html>
