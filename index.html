@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
     <title>Unity WebGL Player | GTAGWebport</title>
     <style>
       * {
@@ -10,82 +11,219 @@
         padding: 0;
         box-sizing: border-box;
       }
-
-      body {
-        background: #231F20;
-        width: 100vw;
-        height: 100vh;
+      
+      html, body {
+        width: 100%;
+        height: 100%;
         overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      #unity-canvas {
-        width: 960px;
-        height: 600px;
         background: #231F20;
       }
-
-      /* When fullscreen, fill the entire screen */
-      :fullscreen #unity-canvas,
-      :-webkit-full-screen #unity-canvas,
-      :-moz-full-screen #unity-canvas {
-        width: 100vw !important;
-        height: 100vh !important;
+      
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
       }
-
-      #fullscreen-btn {
-        position: fixed;
-        bottom: 16px;
-        right: 16px;
-        background: rgba(0,0,0,0.6);
+      
+      #unity-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        background: #231F20;
+        display: block;
+      }
+      
+      /* Loading Screen */
+      #loading-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #231F20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      #loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-content {
+        text-align: center;
         color: white;
-        border: 1px solid rgba(255,255,255,0.3);
-        padding: 8px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-        z-index: 9999;
-        transition: background 0.2s;
+        font-family: Arial, sans-serif;
       }
-
-      #fullscreen-btn:hover {
-        background: rgba(255,255,255,0.2);
+      
+      .loading-title {
+        font-size: 32px;
+        margin-bottom: 30px;
+        font-weight: bold;
+      }
+      
+      .loading-bar-container {
+        width: 300px;
+        height: 20px;
+        background: #333;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 15px;
+        border: 2px solid #555;
+      }
+      
+      .loading-bar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        transition: width 0.3s ease;
+        border-radius: 8px;
+      }
+      
+      .loading-text {
+        font-size: 16px;
+        color: #aaa;
+        margin-top: 10px;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #333;
+        border-top-color: #4CAF50;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* Fullscreen Button */
+      #fullscreen-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 0, 0, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        transition: all 0.3s ease;
+      }
+      
+      #fullscreen-button:hover {
+        background: rgba(0, 0, 0, 0.9);
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: scale(1.1);
+      }
+      
+      #fullscreen-button svg {
+        width: 24px;
+        height: 24px;
+        fill: white;
+      }
+      
+      /* Hide fullscreen button when in fullscreen */
+      :-webkit-full-screen #fullscreen-button,
+      :-moz-full-screen #fullscreen-button,
+      :fullscreen #fullscreen-button {
+        display: none;
       }
     </style>
   </head>
   <body>
-    <canvas id="unity-canvas" width=960 height=600></canvas>
-    <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-
-    <script src="Build/GTAG Webport.loader.js"></script>
+    <div id="unity-container">
+      <canvas id="unity-canvas"></canvas>
+      
+      <!-- Loading Screen -->
+      <div id="loading-screen">
+        <div class="loading-content">
+          <div class="loading-title">GTAGWebport</div>
+          <div class="loading-bar-container">
+            <div class="loading-bar" id="loading-bar"></div>
+          </div>
+          <div class="loading-text" id="loading-text">Loading... 0%</div>
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+      
+      <!-- Fullscreen Button -->
+      <button id="fullscreen-button" title="Fullscreen (F11)">
+        <svg viewBox="0 0 24 24">
+          <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+      </button>
+    </div>
+    
+    <script src="Build/Build.loader.js"></script>
     <script>
-      // Handle mobile
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        var canvas = document.querySelector("#unity-canvas");
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.position = "fixed";
+      var unityInstance = null;
+      var loadingScreen = document.getElementById('loading-screen');
+      var loadingBar = document.getElementById('loading-bar');
+      var loadingText = document.getElementById('loading-text');
+      var canvas = document.getElementById('unity-canvas');
+      var fullscreenButton = document.getElementById('fullscreen-button');
+      
+      // Update loading progress
+      function updateLoadingProgress(progress) {
+        var percent = Math.round(progress * 100);
+        loadingBar.style.width = percent + '%';
+        loadingText.textContent = 'Loading... ' + percent + '%';
+        
+        // Add specific messages for different stages
+        if (percent < 30) {
+          loadingText.textContent = 'Loading chunks... ' + percent + '%';
+        } else if (percent < 60) {
+          loadingText.textContent = 'Loading framework... ' + percent + '%';
+        } else if (percent < 90) {
+          loadingText.textContent = 'Initializing... ' + percent + '%';
+        } else if (percent < 100) {
+          loadingText.textContent = 'Almost ready... ' + percent + '%';
+        } else {
+          loadingText.textContent = 'Starting game...';
+        }
       }
-
-      // Fullscreen toggle function
+      
+      // Hide loading screen
+      function hideLoadingScreen() {
+        loadingScreen.classList.add('fade-out');
+        setTimeout(function() {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }
+      
+      // Fullscreen functionality
       function toggleFullscreen() {
-        const elem = document.documentElement;
-        if (!document.fullscreenElement &&
-            !document.webkitFullscreenElement &&
-            !document.mozFullScreenElement) {
+        var container = document.getElementById('unity-container');
+        
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement) {
           // Enter fullscreen
-          if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-          } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-          } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
+          if (container.requestFullscreen) {
+            container.requestFullscreen();
+          } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+          } else if (container.mozRequestFullScreen) {
+            container.mozRequestFullScreen();
           }
         } else {
           // Exit fullscreen
@@ -98,43 +236,38 @@
           }
         }
       }
-
-      // F11 key listener
+      
+      // Fullscreen button click
+      fullscreenButton.addEventListener('click', toggleFullscreen);
+      
+      // F11 key for fullscreen
       document.addEventListener('keydown', function(e) {
         if (e.key === 'F11') {
-          e.preventDefault(); // prevent browser's default F11 behavior
+          e.preventDefault();
           toggleFullscreen();
         }
       });
-
-      // Update canvas size on fullscreen change
-      document.addEventListener('fullscreenchange', resizeCanvas);
-      document.addEventListener('webkitfullscreenchange', resizeCanvas);
-      document.addEventListener('mozfullscreenchange', resizeCanvas);
-
-      function resizeCanvas() {
-        const canvas = document.querySelector("#unity-canvas");
-        if (document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.mozFullScreenElement) {
-          canvas.style.width = "100vw";
-          canvas.style.height = "100vh";
-          document.getElementById('fullscreen-btn').textContent = '✕ Exit Fullscreen';
-        } else {
-          canvas.style.width = "960px";
-          canvas.style.height = "600px";
-          document.getElementById('fullscreen-btn').textContent = '⛶ Fullscreen';
-        }
-      }
-
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/GTAG Webport.data",
-        frameworkUrl: "Build/GTAG Webport.framework.js",
-        codeUrl: "Build/GTAG Webport.wasm",
+      
+      // Create Unity Instance
+      createUnityInstance(canvas, {
+        dataUrl: "Build/Build.data",
+        frameworkUrl: "Build/Build.framework.js",
+        codeUrl: "Build/Build.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "CrunchArcade",
         productName: "GTAGWebport",
         productVersion: "1",
+      }, function(progress) {
+        // Progress callback
+        updateLoadingProgress(progress);
+      }).then(function(instance) {
+        unityInstance = instance;
+        hideLoadingScreen();
+        console.log('Unity game loaded successfully!');
+      }).catch(function(message) {
+        loadingText.textContent = 'Error loading game: ' + message;
+        loadingText.style.color = '#ff4444';
+        console.error('Unity load error:', message);
       });
     </script>
   </body>
